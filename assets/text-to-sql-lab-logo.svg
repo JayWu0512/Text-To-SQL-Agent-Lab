@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Text-to-SQL Lab</title>
+  <desc id="desc">A query arrow flowing into a database.</desc>
+  <rect width="64" height="64" rx="16" fill="#7A6652"/>
+  <path d="M15 18h11M15 18l5-5M15 18l5 5" fill="none" stroke="#FAF7F0" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <path d="M27 18h8" fill="none" stroke="#B7794A" stroke-linecap="round" stroke-width="4"/>
+  <path d="M39 13l8 5-8 5" fill="none" stroke="#B7794A" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <path d="M16 31c0-3.3 7.2-6 16-6s16 2.7 16 6-7.2 6-16 6-16-2.7-16-6Z" fill="#FAF7F0"/>
+  <path d="M16 31v15c0 3.3 7.2 6 16 6s16-2.7 16-6V31c0 3.3-7.2 6-16 6s-16-2.7-16-6Z" fill="#EFE7DA"/>
+  <path d="M16 38c0 3.3 7.2 6 16 6s16-2.7 16-6M16 45c0 3.3 7.2 6 16 6s16-2.7 16-6" fill="none" stroke="#B7794A" stroke-width="2.5"/>
+  <ellipse cx="32" cy="31" rx="16" ry="6" fill="none" stroke="#B7794A" stroke-width="2.5"/>
+</svg>
