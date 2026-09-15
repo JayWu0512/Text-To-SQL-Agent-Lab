@@ -1,0 +1,51 @@
+[
+  {
+    "question": "Which five states have the most customers?",
+    "sql": "SELECT customer_state, COUNT(*) AS customer_count\nFROM customers\nGROUP BY customer_state\nORDER BY customer_count DESC\nLIMIT 5;",
+    "concepts": ["GROUP BY", "ORDER BY", "LIMIT"],
+    "tables": ["customers"],
+    "difficulty": "basic"
+  },
+  {
+    "question": "Find the second delivered purchase for each customer.",
+    "sql": "WITH ranked_orders AS (\n  SELECT c.customer_unique_id, o.order_id, o.order_purchase_timestamp,\n         ROW_NUMBER() OVER (PARTITION BY c.customer_unique_id ORDER BY o.order_purchase_timestamp, o.order_id) AS purchase_number\n  FROM customers c\n  JOIN orders o ON o.customer_id = c.customer_id\n  WHERE o.order_status = 'delivered'\n)\nSELECT customer_unique_id, order_id, order_purchase_timestamp\nFROM ranked_orders\nWHERE purchase_number = 2\nORDER BY customer_unique_id;",
+    "concepts": ["JOIN", "CTE", "WINDOW FUNCTION"],
+    "tables": ["customers", "orders"],
+    "difficulty": "advanced"
+  },
+  {
+    "question": "Show delivered revenue by customer state, highest revenue first.",
+    "sql": "SELECT c.customer_state, SUM(oi.price) AS revenue\nFROM customers c\nJOIN orders o ON o.customer_id = c.customer_id\nJOIN order_items oi ON oi.order_id = o.order_id\nWHERE o.order_status = 'delivered'\nGROUP BY c.customer_state\nORDER BY revenue DESC;",
+    "concepts": ["JOIN", "GROUP BY", "SUM"],
+    "tables": ["customers", "orders", "order_items"],
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "For orders placed in 2018, calculate the total number of orders for each month, from earliest to latest.",
+    "sql": "SELECT DATE_TRUNC('month', order_purchase_timestamp)::date AS order_month, COUNT(*) AS order_count\nFROM orders\nWHERE order_purchase_timestamp >= DATE '2018-01-01'\n  AND order_purchase_timestamp < DATE '2019-01-01'\nGROUP BY order_month\nORDER BY order_month;",
+    "concepts": ["DATE_TRUNC", "GROUP BY"],
+    "tables": ["orders"],
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Which customers have more than two delivered purchases, ordered from most purchases to least?",
+    "sql": "SELECT c.customer_unique_id, COUNT(*) AS delivered_purchase_count\nFROM customers AS c\nJOIN orders AS o ON o.customer_id = c.customer_id\nWHERE o.order_status = 'delivered'\nGROUP BY c.customer_unique_id\nHAVING COUNT(*) > 2\nORDER BY delivered_purchase_count DESC, c.customer_unique_id;",
+    "concepts": ["JOIN", "GROUP BY", "HAVING"],
+    "tables": ["customers", "orders"],
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Show delivered sales in São Paulo (SP).",
+    "sql": "SELECT SUM(oi.price) AS revenue\nFROM customers AS c\nJOIN orders AS o ON o.customer_id = c.customer_id\nJOIN order_items AS oi ON oi.order_id = o.order_id\nWHERE c.customer_state = 'SP'\n  AND o.order_status = 'delivered';",
+    "concepts": ["JOIN", "WHERE", "SUM"],
+    "tables": ["customers", "orders", "order_items"],
+    "difficulty": "intermediate"
+  },
+  {
+    "question": "Find the third delivered purchase for each customer, ordered by customer ID.",
+    "sql": "WITH ranked_orders AS (\n  SELECT c.customer_unique_id, o.order_id, o.order_purchase_timestamp,\n         ROW_NUMBER() OVER (PARTITION BY c.customer_unique_id ORDER BY o.order_purchase_timestamp, o.order_id) AS purchase_number\n  FROM customers AS c\n  JOIN orders AS o ON o.customer_id = c.customer_id\n  WHERE o.order_status = 'delivered'\n)\nSELECT customer_unique_id, order_id, order_purchase_timestamp\nFROM ranked_orders\nWHERE purchase_number = 3\nORDER BY customer_unique_id;",
+    "concepts": ["JOIN", "CTE", "WINDOW FUNCTION"],
+    "tables": ["customers", "orders"],
+    "difficulty": "advanced"
+  }
+]

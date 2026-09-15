@@ -1,0 +1,27 @@
+[
+  {
+    "term": "Revenue",
+    "definition": "Sum of order_items.price. Do not include freight unless the question explicitly asks for it.",
+    "tables": ["order_items"]
+  },
+  {
+    "term": "Customer",
+    "definition": "For analysis across multiple purchases, identify a person with customers.customer_unique_id. orders.customer_id identifies an order address record.",
+    "tables": ["customers", "orders"]
+  },
+  {
+    "term": "Valid purchase",
+    "definition": "A delivered order, unless the question explicitly requests another order status.",
+    "tables": ["orders"]
+  },
+  {
+    "term": "Order revenue",
+    "definition": "Sum of item prices for one order_id.",
+    "tables": ["orders", "order_items"]
+  },
+  {
+    "term": "Purchase date",
+    "definition": "Use orders.order_purchase_timestamp when ordering or grouping purchases by time.",
+    "tables": ["orders"]
+  }
+]
