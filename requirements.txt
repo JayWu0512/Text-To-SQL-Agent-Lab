@@ -1,0 +1,4 @@
+SQLAlchemy>=2.0,<3
+psycopg[binary]>=3.1,<4
+chromadb>=0.5,<2
+sqlglot>=26,<30
