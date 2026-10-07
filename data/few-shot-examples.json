@@ -21,6 +21,13 @@
     "difficulty": "intermediate"
   },
   {
+    "question": "Return the top 5 customer states by total item revenue. Sum order_items.price only; exclude freight.",
+    "sql": "SELECT c.customer_state, SUM(oi.price) AS total_revenue\nFROM customers AS c\nJOIN orders AS o ON c.customer_id = o.customer_id\nJOIN order_items AS oi ON o.order_id = oi.order_id\nGROUP BY c.customer_state\nORDER BY total_revenue DESC\nLIMIT 5;",
+    "concepts": ["JOIN", "GROUP BY", "SUM", "LIMIT"],
+    "tables": ["customers", "orders", "order_items"],
+    "difficulty": "intermediate"
+  },
+  {
     "question": "For orders placed in 2018, calculate the total number of orders for each month, from earliest to latest.",
     "sql": "SELECT DATE_TRUNC('month', order_purchase_timestamp)::date AS order_month, COUNT(*) AS order_count\nFROM orders\nWHERE order_purchase_timestamp >= DATE '2018-01-01'\n  AND order_purchase_timestamp < DATE '2019-01-01'\nGROUP BY order_month\nORDER BY order_month;",
     "concepts": ["DATE_TRUNC", "GROUP BY"],
@@ -45,6 +52,20 @@
     "question": "Find the third delivered purchase for each customer, ordered by customer ID.",
     "sql": "WITH ranked_orders AS (\n  SELECT c.customer_unique_id, o.order_id, o.order_purchase_timestamp,\n         ROW_NUMBER() OVER (PARTITION BY c.customer_unique_id ORDER BY o.order_purchase_timestamp, o.order_id) AS purchase_number\n  FROM customers AS c\n  JOIN orders AS o ON o.customer_id = c.customer_id\n  WHERE o.order_status = 'delivered'\n)\nSELECT customer_unique_id, order_id, order_purchase_timestamp\nFROM ranked_orders\nWHERE purchase_number = 3\nORDER BY customer_unique_id;",
     "concepts": ["JOIN", "CTE", "WINDOW FUNCTION"],
+    "tables": ["customers", "orders"],
+    "difficulty": "advanced"
+  },
+  {
+    "question": "Return each customer's third purchase. Use customer_unique_id; order purchases by timestamp, then order_id.",
+    "sql": "WITH ranked_orders AS (\n  SELECT c.customer_unique_id, o.order_id, o.order_purchase_timestamp,\n         ROW_NUMBER() OVER (PARTITION BY c.customer_unique_id ORDER BY o.order_purchase_timestamp, o.order_id) AS order_number\n  FROM customers AS c\n  JOIN orders AS o ON c.customer_id = o.customer_id\n)\nSELECT customer_unique_id, order_id, order_purchase_timestamp\nFROM ranked_orders\nWHERE order_number = 3\nORDER BY order_purchase_timestamp, order_id;",
+    "concepts": ["JOIN", "CTE", "WINDOW FUNCTION"],
+    "tables": ["customers", "orders"],
+    "difficulty": "advanced"
+  },
+  {
+    "question": "By state, count returning customers (customer_unique_id) with at least two delivered orders. Return states with at least two, highest count first.",
+    "sql": "WITH returning_customers AS (\n  SELECT c.customer_unique_id, c.customer_state,\n         COUNT(DISTINCT o.order_id) AS delivered_order_count\n  FROM customers AS c\n  JOIN orders AS o ON o.customer_id = c.customer_id\n  WHERE o.order_status = 'delivered'\n  GROUP BY c.customer_unique_id, c.customer_state\n  HAVING COUNT(DISTINCT o.order_id) >= 2\n), returning_customers_by_state AS (\n  SELECT customer_state, COUNT(*) AS returning_customer_count\n  FROM returning_customers\n  GROUP BY customer_state\n)\nSELECT customer_state, returning_customer_count\nFROM returning_customers_by_state\nWHERE returning_customer_count >= 2\nORDER BY returning_customer_count DESC, customer_state;",
+    "concepts": ["JOIN", "CTE", "GROUP BY", "HAVING"],
     "tables": ["customers", "orders"],
     "difficulty": "advanced"
   }
