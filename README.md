@@ -109,4 +109,4 @@ Alternatively, with the same environment variables set locally, run:
 python3 seed_chroma.py --cloud --with-schema
 ```
 
-Do not deploy user API keys as environment variables: keys are request-scoped from the learner's browser session. Use least-privilege database credentials and add production controls such as RBAC, query-cost limits, monitoring, audit-safe telemetry, and human review before connecting real organizational data.
+Set `DUKE_API_KEY` only when the deployment should use Duke AI Gateway on behalf of visitors; the browser never receives this key and learners select only a model. Protect a shared deployment with authentication or rate limits before public use. Use least-privilege database credentials and add production controls such as RBAC, query-cost limits, monitoring, audit-safe telemetry, and human review before connecting real organizational data.

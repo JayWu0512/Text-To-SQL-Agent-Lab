@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from lib.agent import _context, run
 from lib.benchmarks import answer_key_for, load_benchmarks
 from lib.evaluation import evaluate_results
-from lib.llm import PROVIDERS, _response_text, test_connection
+from lib.llm import PROVIDERS, _resolve_api_key, _response_text, test_connection
 from lib import retrieval
 from lib.sql_safety import validate_sql_safety
 
@@ -109,6 +109,10 @@ class LlmResponseTests(unittest.TestCase):
     def test_duke_gateway_uses_its_openai_compatible_responses_endpoint(self):
         self.assertEqual(PROVIDERS["duke"]["responses_url"], "https://litellm.oit.duke.edu/v1/responses")
         self.assertEqual(PROVIDERS["duke"]["models_url"], "https://litellm.oit.duke.edu/v1/models")
+
+    def test_duke_uses_the_deployment_key_when_no_browser_key_is_given(self):
+        with patch.dict(os.environ, {"DUKE_API_KEY": "deployment-key"}, clear=True):
+            self.assertEqual(_resolve_api_key("", "duke"), "deployment-key")
 
     @patch("lib.llm._request")
     def test_connection_uses_a_simple_non_structured_request(self, request):

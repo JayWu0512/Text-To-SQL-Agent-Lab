@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 import ssl
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
@@ -21,6 +22,14 @@ def _provider(provider: str) -> dict:
     if selected is None:
         raise ValueError("Choose a supported API provider.")
     return selected
+
+
+def _resolve_api_key(api_key: str, provider: str) -> str:
+    if api_key.strip():
+        return api_key.strip()
+    if provider == "duke":
+        return os.environ.get("DUKE_API_KEY", "")
+    return ""
 
 
 def _response_text(payload: dict) -> str:
@@ -65,6 +74,7 @@ def _http_error_message(error: HTTPError, provider_name: str) -> str:
 
 def _request(api_key: str, model: str, instructions: str, prompt: str, provider: str = "openai", structured: bool = True) -> str:
     selected = _provider(provider)
+    api_key = _resolve_api_key(api_key, provider)
     if not api_key.strip():
         raise ValueError(f"Enter a {selected['name']} API key.")
     if not model.strip():
@@ -92,6 +102,7 @@ def _request(api_key: str, model: str, instructions: str, prompt: str, provider:
 def list_models(api_key: str, provider: str = "openai") -> dict:
     """Return only model IDs the selected key can see; keys are never retained."""
     selected = _provider(provider)
+    api_key = _resolve_api_key(api_key, provider)
     if not api_key.strip():
         raise ValueError(f"Enter a {selected['name']} API key first.")
     request = Request(selected["models_url"], headers={"Authorization": f"Bearer {api_key}"})

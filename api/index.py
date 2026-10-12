@@ -48,7 +48,7 @@ class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = request_path(self.path)
         if path == "/api/health":
-            return respond(self, HTTPStatus.OK, {"mode": "vercel", "connected": bool(os.environ.get("SUPABASE_CONNECTION_URL")), "chroma": chroma_status()})
+            return respond(self, HTTPStatus.OK, {"mode": "vercel", "connected": bool(os.environ.get("SUPABASE_CONNECTION_URL")), "duke_configured": bool(os.environ.get("DUKE_API_KEY")), "chroma": chroma_status()})
         file = ROOT / "index.html" if path in {"/", "/text-to-sql", "/index.html"} else (ROOT / path.lstrip("/"))
         if file.is_file() and ROOT in file.resolve().parents:
             data = file.read_bytes(); content_type = mimetypes.guess_type(str(file))[0] or "application/octet-stream"
