@@ -9,6 +9,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _cloud_configured() -> bool:
+    return all(os.environ.get(name) for name in ("CHROMA_API_KEY", "CHROMA_TENANT", "CHROMA_DATABASE"))
+
+
 def _local_path() -> str | None:
     if os.environ.get("CHROMA_PATH"):
         return os.environ["CHROMA_PATH"]
@@ -22,15 +26,20 @@ def chroma_status() -> dict:
         import chromadb  # noqa: F401
     except ImportError:
         return {"configured": False, "message": "Install chromadb to enable retrieval."}
+    if _cloud_configured():
+        return {"configured": True, "message": "Chroma Cloud is configured."}
     if os.environ.get("CHROMA_URL"):
         return {"configured": True, "message": "Remote Chroma is configured."}
     if _local_path():
         return {"configured": True, "message": "Local Chroma is configured."}
-    return {"configured": False, "message": "Set CHROMA_URL for remote Chroma."}
+    return {"configured": False, "message": "Set Chroma Cloud credentials or CHROMA_URL for remote Chroma."}
 
 
 def _client():
     import chromadb
+    if _cloud_configured():
+        return chromadb.CloudClient(api_key=os.environ["CHROMA_API_KEY"], tenant=os.environ["CHROMA_TENANT"],
+                                    database=os.environ["CHROMA_DATABASE"])
     remote_url = os.environ.get("CHROMA_URL")
     if remote_url:
         from urllib.parse import urlparse
@@ -54,9 +63,6 @@ def retrieve(name: str, question: str, limit: int) -> list[dict]:
     if not chroma_status()["configured"]:
         return []
     collection = _collection(name)
-    if collection.count() == 0:
-        seed_collections()
-        collection = _collection(name)
     if collection.count() == 0:
         return []
     results = collection.query(query_texts=[question], n_results=min(max(1, min(limit, 10)), collection.count()), include=["documents", "metadatas", "distances"])

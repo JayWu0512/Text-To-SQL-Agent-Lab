@@ -14,15 +14,22 @@ ROOT = Path(__file__).resolve().parent
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Build Text-to-SQL Lab's local Chroma index.")
+    parser = argparse.ArgumentParser(description="Build a Text-to-SQL Lab Chroma index.")
     parser.add_argument("--path", default=str(ROOT / ".chroma"), help="Local Chroma folder (default: ./.chroma)")
+    parser.add_argument("--cloud", action="store_true", help="Index the configured Chroma Cloud database instead of a local folder.")
     parser.add_argument("--with-schema", action="store_true", help="Also index live schema metadata using SUPABASE_CONNECTION_URL and SUPABASE_DATABASE_PASSWORD.")
     args = parser.parse_args()
 
-    # This utility intentionally targets a project-local Chroma folder, even if
-    # a remote Chroma environment variable happens to be configured elsewhere.
-    os.environ.pop("CHROMA_URL", None)
-    os.environ["CHROMA_PATH"] = str(Path(args.path).resolve())
+    if args.cloud:
+        required = ("CHROMA_API_KEY", "CHROMA_TENANT", "CHROMA_DATABASE")
+        missing = [name for name in required if not os.environ.get(name)]
+        if missing:
+            parser.error("--cloud requires " + ", ".join(missing))
+    else:
+        # This utility intentionally targets a project-local Chroma folder, even if
+        # a remote Chroma environment variable happens to be configured elsewhere.
+        os.environ.pop("CHROMA_URL", None)
+        os.environ["CHROMA_PATH"] = str(Path(args.path).resolve())
     engine = None
     try:
         schema_docs = None
@@ -37,7 +44,7 @@ def main() -> int:
         if engine is not None:
             engine.dispose()
 
-    print(f"Chroma index ready: {Path(os.environ['CHROMA_PATH'])}")
+    print("Chroma Cloud index ready." if args.cloud else f"Chroma index ready: {Path(os.environ['CHROMA_PATH'])}")
     print("Indexed sources:")
     print("  data/business-glossary.json  -> business_glossary")
     print("  data/few-shot-examples.json  -> sql_examples")

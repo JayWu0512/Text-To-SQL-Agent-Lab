@@ -99,6 +99,14 @@ Tests cover SQL safety, mutation rejection, benchmark and retrieval data, result
 
 ## Deploying on Vercel
 
-`vercel.json` routes requests through `api/index.py`. Configure `SUPABASE_CONNECTION_URL` and `SUPABASE_DATABASE_PASSWORD` as deployment environment variables; set the Chroma environment variables only when using a remote Chroma deployment.
+`vercel.json` routes requests through `api/index.py`. Configure `SUPABASE_CONNECTION_URL` and `SUPABASE_DATABASE_PASSWORD` as deployment environment variables. For Chroma Cloud, also configure `CHROMA_API_KEY`, `CHROMA_TENANT`, and `CHROMA_DATABASE`.
+
+Create the `business_glossary`, `sql_examples`, and `schema_docs` collections in Chroma Cloud. To index them once from the deployed lab, set a secret `CHROMA_SEED_TOKEN` in Vercel, then select **Seed Chroma from database** in the lab and enter that token. The endpoint upserts the project glossary and verified SQL examples plus the live Supabase schema metadata. The token is required so visitors cannot re-index the collections.
+
+Alternatively, with the same environment variables set locally, run:
+
+```sh
+python3 seed_chroma.py --cloud --with-schema
+```
 
 Do not deploy user API keys as environment variables: keys are request-scoped from the learner's browser session. Use least-privilege database credentials and add production controls such as RBAC, query-cost limits, monitoring, audit-safe telemetry, and human review before connecting real organizational data.

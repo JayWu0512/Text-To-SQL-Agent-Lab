@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 import unittest
 from pathlib import Path
@@ -10,6 +11,7 @@ from lib.agent import _context, run
 from lib.benchmarks import answer_key_for, load_benchmarks
 from lib.evaluation import evaluate_results
 from lib.llm import PROVIDERS, _response_text, test_connection
+from lib import retrieval
 from lib.sql_safety import validate_sql_safety
 
 
@@ -56,6 +58,12 @@ class EvaluationTests(unittest.TestCase):
 
 
 class DataTests(unittest.TestCase):
+    def test_chroma_cloud_client_uses_deployment_credentials(self):
+        cloud = {"CHROMA_API_KEY": "key", "CHROMA_TENANT": "tenant", "CHROMA_DATABASE": "database"}
+        with patch.dict(os.environ, cloud, clear=True), patch("chromadb.CloudClient") as client:
+            retrieval._client()
+        client.assert_called_once_with(api_key="key", tenant="tenant", database="database")
+
     def test_benchmarks_load(self):
         self.assertGreaterEqual(len(load_benchmarks()), 3)
 

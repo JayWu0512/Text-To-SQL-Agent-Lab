@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import hmac
 import mimetypes
 import os
 from http import HTTPStatus
@@ -35,6 +36,14 @@ def respond(handler, status, payload):
     handler.wfile.write(data)
 
 
+def authorize_chroma_seed(token: str) -> None:
+    expected = os.environ.get("CHROMA_SEED_TOKEN", "")
+    if not expected:
+        raise ValueError("Set CHROMA_SEED_TOKEN before indexing Chroma Cloud.")
+    if not hmac.compare_digest(token, expected):
+        raise ValueError("Invalid Chroma indexing token.")
+
+
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
         path = request_path(self.path)
@@ -61,6 +70,8 @@ class handler(BaseHTTPRequestHandler):
                 if answer_key is None:
                     raise ValueError("No answer key is available for this question.")
                 return respond(self, HTTPStatus.OK, answer_key)
+            if path == "/api/seed-chroma":
+                authorize_chroma_seed(str(payload.get("token", "")))
             engine = make_engine(serverless=True) if path in {"/api/query", "/api/text-to-sql", "/api/seed-chroma"} else None
             try:
                 if path == "/api/query": return respond(self, HTTPStatus.OK, execute_read_only(engine, str(payload.get("sql", ""))))
