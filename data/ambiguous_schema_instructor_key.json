@@ -1,0 +1,51 @@
+{
+  "tbl_k7.csv": {
+    "original_file": "customers.csv",
+    "columns": {
+      "f01": "customer_id",
+      "f02": "customer_unique_id",
+      "f03": "customer_zip_code_prefix",
+      "f04": "customer_city",
+      "f05": "customer_state"
+    }
+  },
+  "tbl_m2.csv": {
+    "original_file": "order_items.csv",
+    "columns": {
+      "f01": "order_id",
+      "f02": "order_item_id",
+      "f03": "product_id",
+      "f04": "seller_id",
+      "f05": "shipping_limit_date",
+      "f06": "price",
+      "f07": "freight_value"
+    }
+  },
+  "tbl_q9.csv": {
+    "original_file": "orders.csv",
+    "columns": {
+      "f01": "order_id",
+      "f02": "customer_id",
+      "f03": "order_status",
+      "f04": "order_purchase_timestamp",
+      "f05": "order_approved_at",
+      "f06": "order_delivered_carrier_date",
+      "f07": "order_delivered_customer_date",
+      "f08": "order_estimated_delivery_date"
+    }
+  },
+  "tbl_v4.csv": {
+    "original_file": "products.csv",
+    "columns": {
+      "f01": "product_id",
+      "f02": "product_category_name",
+      "f03": "product_name_lenght",
+      "f04": "product_description_lenght",
+      "f05": "product_photos_qty",
+      "f06": "product_weight_g",
+      "f07": "product_length_cm",
+      "f08": "product_height_cm",
+      "f09": "product_width_cm"
+    }
+  }
+}
