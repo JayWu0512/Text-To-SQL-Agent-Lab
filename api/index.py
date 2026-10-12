@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 from lib.database import execute_read_only, make_engine, schema_documents
-from lib.llm import test_connection
+from lib.llm import list_models, test_connection
 from lib.retrieval import chroma_status, seed_collections
 from lib.benchmarks import answer_key_for
 from lib.service import run_pipeline
@@ -47,7 +47,9 @@ class handler(BaseHTTPRequestHandler):
                 raise ValueError("Request body is missing or too large.")
             payload, path = json.loads(self.rfile.read(size).decode("utf-8")), urlparse(self.path).path
             if path == "/api/test-llm":
-                return respond(self, HTTPStatus.OK, test_connection(str(payload.get("api_key", "")), str(payload.get("model", "gpt-4.1-mini"))))
+                return respond(self, HTTPStatus.OK, test_connection(str(payload.get("api_key", "")), str(payload.get("model", "gpt-4.1-mini")), str(payload.get("provider", "openai"))))
+            if path == "/api/models":
+                return respond(self, HTTPStatus.OK, list_models(str(payload.get("api_key", "")), str(payload.get("provider", "openai"))))
             if path == "/api/benchmark-answer":
                 answer_key = answer_key_for(str(payload.get("question", "")))
                 if answer_key is None:

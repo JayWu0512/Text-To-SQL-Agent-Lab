@@ -15,7 +15,7 @@ The original `../SQL-Practice-Lab` folder is intentionally untouched. Use its Su
 
 1. Start the app with `scripts/Open_Text_to_SQL_Agent_Lab.command`.
 2. Open `http://127.0.0.1:8766` — do not open `index.html` directly.
-3. In **Connections**, test an OpenAI API key, then connect Supabase.
+3. In **Connections**, choose OpenAI or Duke AI Gateway, test its API key, then connect Supabase.
 4. Wait for the database status to say that retrieval context was indexed.
 5. Open **Experiment Lab**, choose **Full Agent**, select a built-in challenge, and run it.
 
@@ -32,7 +32,7 @@ Enter an OpenAI key in the same card and test it. The key is held in the page's 
 - it is never returned by an endpoint or written to server logs;
 - errors intentionally do not repeat a key.
 
-The default model is `gpt-4.1-mini`; change it only to a model available to your OpenAI account.
+For OpenAI, the default model is `gpt-4.1-mini`; change it only to a model available to your OpenAI account. For Duke AI Gateway, choose **Duke AI Gateway**, paste a newly generated key from the Duke AI Dashboard, and use `GPT 4.1` (or an exact model name shown in your Duke model catalog). The lab sends Duke keys only to `https://litellm.oit.duke.edu/v1/responses`.
 
 ## ChromaDB retrieval: what is indexed
 

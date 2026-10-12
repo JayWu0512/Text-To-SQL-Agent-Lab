@@ -9,7 +9,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from lib.agent import _context, run
 from lib.benchmarks import answer_key_for, load_benchmarks
 from lib.evaluation import evaluate_results
-from lib.llm import _response_text, test_connection
+from lib.llm import PROVIDERS, _response_text, test_connection
 from lib.sql_safety import validate_sql_safety
 
 
@@ -98,10 +98,14 @@ class LlmResponseTests(unittest.TestCase):
     def test_accepts_sdk_convenience_output_text_when_present(self):
         self.assertEqual(_response_text({"output_text": "ready"}), "ready")
 
+    def test_duke_gateway_uses_its_openai_compatible_responses_endpoint(self):
+        self.assertEqual(PROVIDERS["duke"]["responses_url"], "https://litellm.oit.duke.edu/v1/responses")
+        self.assertEqual(PROVIDERS["duke"]["models_url"], "https://litellm.oit.duke.edu/v1/models")
+
     @patch("lib.llm._request")
-    def test_connection_requests_json_explicitly(self, request):
+    def test_connection_uses_a_simple_non_structured_request(self, request):
         test_connection("sk-test", "gpt-4.1-mini")
-        self.assertIn("JSON", request.call_args.args[3])
+        self.assertFalse(request.call_args.kwargs["structured"])
 
 
 if __name__ == "__main__":

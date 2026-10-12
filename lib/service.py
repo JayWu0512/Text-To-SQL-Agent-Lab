@@ -10,8 +10,9 @@ from .evaluation import evaluate_results
 
 def run_pipeline(payload: dict, engine=None) -> dict:
     options = payload.get("options", {})
+    provider = str(payload.get("provider", "openai"))
     result = run(str(payload.get("question", "")), str(payload.get("api_key", "")),
-                 str(payload.get("model", "gpt-4.1-mini")), options, int(payload.get("top_k", 4)))
+                 str(payload.get("model", "gpt-4.1-mini")), options, int(payload.get("top_k", 4)), provider=provider)
     if result.get("clarification_needed") or not result.get("sql"):
         return result
     attempts = [{"attempt": 1, "sql": result["sql"], "validation": result.get("validation")}]
@@ -36,7 +37,7 @@ def run_pipeline(payload: dict, engine=None) -> dict:
             result["execution_error"] = failure
             break
         revised = run(str(payload.get("question", "")), str(payload.get("api_key", "")),
-                      str(payload.get("model", "gpt-4.1-mini")), options, int(payload.get("top_k", 4)), failure)
+                      str(payload.get("model", "gpt-4.1-mini")), options, int(payload.get("top_k", 4)), failure, provider)
         result = revised
         attempts.append({"attempt": repair_number + 2, "sql": result.get("sql", ""), "feedback": failure,
                          "validation": result.get("validation")})

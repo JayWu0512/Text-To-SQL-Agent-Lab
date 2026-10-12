@@ -83,7 +83,7 @@ def _prompt(question: str, context: dict, options: dict, repair_feedback: str = 
     return "\n\n".join(sections)
 
 
-def run(question: str, api_key: str, model: str, options: dict, top_k: int = 4, repair_feedback: str = "") -> dict:
+def run(question: str, api_key: str, model: str, options: dict, top_k: int = 4, repair_feedback: str = "", provider: str = "openai") -> dict:
     question = question.strip()
     if not question:
         raise ValueError("Enter a business question first.")
@@ -93,7 +93,7 @@ def run(question: str, api_key: str, model: str, options: dict, top_k: int = 4, 
     if clarification:
         return {"clarification_needed": True, "clarification_question": clarification, "context": _context(question, options, top_k), "repair_history": []}
     context = _context(question, options, top_k)
-    response = generate_json(api_key, model, _prompt(question, context, options, repair_feedback))
+    response = generate_json(api_key, model, _prompt(question, context, options, repair_feedback), provider)
     response["context"] = context
     response["retrieval_state"] = retrieval.chroma_status()
     response["repair_history"] = []
