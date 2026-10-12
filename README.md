@@ -1,125 +1,104 @@
 # Text-to-SQL Agent Lab
 
-An interactive next chapter for SQL Practice Lab. It is a standalone project that preserves the original tutorial and teaches why a production Text-to-SQL system is a pipeline—not merely an LLM prompt.
+An interactive, standalone follow-on to SQL Practice Lab. This course teaches how a production-minded Text-to-SQL agent turns a business question into safe, inspectable SQL through retrieval, planning, execution, validation, and repair.
+
+It also includes hands-on material on schema design, explainability, transparency, accountability, and an experiment that compares readable and ambiguous data schemas in Databricks Genie.
+
+## What learners can do
+
+- Work through guided stages: understand the question, retrieve context, use examples, plan, generate SQL, validate it, and repair failures.
+- Build a configurable agent in the **Experiment Lab**, run it against a connected Supabase database, inspect its evidence, and compare runs.
+- Explore **Database Design for Text-to-SQL**, including naming conventions, primary/foreign keys, table grain, and documentation.
+- Download original or ambiguously named datasets for a controlled Genie comparison.
+- Learn practical XAI concepts with trace, perturbation, permission, audit-trail, and incident-investigation simulations.
+
+Illustrative teaching examples are clearly labelled. Live experiment results come only from the configured local server and database.
 
 ## Run locally
 
-1. Create and activate a Python virtual environment (Python 3.10+ recommended).
-2. Install requirements: `pip install -r requirements.txt`.
-3. Start the local server: `python3 text_to_sql_server.py` (or open `scripts/Open_Text_to_SQL_Agent_Lab.command` on macOS).
-4. Open `http://127.0.0.1:8766`.
-
-The original `../SQL-Practice-Lab` folder is intentionally untouched. Use its Supabase setup guide to create and load the four Olist tables: `customers`, `orders`, `order_items`, and `products`.
-
-## Quick start: run a Full Agent challenge
-
-1. Start the app with `scripts/Open_Text_to_SQL_Agent_Lab.command`.
-2. Open `http://127.0.0.1:8766` — do not open `index.html` directly.
-3. In **Connections**, choose OpenAI or Duke AI Gateway, test its API key, then connect Supabase.
-4. Wait for the database status to say that retrieval context was indexed.
-5. Open **Experiment Lab**, choose **Full Agent**, select a built-in challenge, and run it.
-
-The built-in intermediate and advanced challenges state their required ordering explicitly. They are paired with verified retrieval patterns so that Full Agent can use the same business definitions, schema path, and output contract as the evaluator. Custom questions remain open-ended experiments and are not guaranteed to match a benchmark.
-
-## Connections and key handling
-
-In the **Connections** card, paste a Supabase Session pooler URL (port 5432) and enter its password separately. The local server holds this database connection only in process memory. Every query is run inside a read-only transaction with an eight-second timeout and a 200-row display cap.
-
-Enter an OpenAI key in the same card and test it. The key is held in the page's memory only for the current session:
-
-- it is never written to source, a database, localStorage, or sessionStorage;
-- it is sent only to the server endpoint needed for that request;
-- it is never returned by an endpoint or written to server logs;
-- errors intentionally do not repeat a key.
-
-For OpenAI, the default model is `gpt-4.1-mini`; change it only to a model available to your OpenAI account. For Duke AI Gateway, choose **Duke AI Gateway**, paste a newly generated key from the Duke AI Dashboard, and use `GPT 4.1` (or an exact model name shown in your Duke model catalog). The lab sends Duke keys only to `https://litellm.oit.duke.edu/v1/responses`.
-
-## ChromaDB retrieval: what is indexed
-
-The RAG stages use a persistent local Chroma database at `.chroma/` automatically. It contains compact documents, not a copy of the full Olist dataset.
-
-| Collection | Source | What the model can retrieve |
-| --- | --- | --- |
-| `business_glossary` | `data/business-glossary.json` | Definitions such as what counts as revenue, a customer, and a valid purchase. |
-| `sql_examples` | `data/few-shot-examples.json` | Verified Question → SQL patterns for aggregation, joins, time grouping, ranking, and window functions. |
-| `schema_docs` | Supabase `information_schema` after connection | Table names, columns, data types, and foreign-key relationships. |
-
-When you connect Supabase locally, the app automatically indexes all three sources. If a learner uses retrieval before connecting a database, the glossary and verified examples can still initialize locally, but `schema_docs` stays empty until a database connection supplies live metadata.
-
-### Build the local index without opening the app
-
-On macOS, double-click `scripts/Build_Text_to_SQL_Chroma.command`. On Windows, run `scripts/Build_Text_to_SQL_Chroma.bat`. Both create or update the project-local folder:
-
-```text
-Text-To-SQL-Agent-Lab/
-├── data/
-│   ├── business-glossary.json
-│   └── few-shot-examples.json
-├── scripts/
-│   ├── Build_Text_to_SQL_Chroma.command
-│   └── Open_Text_to_SQL_Agent_Lab.command
-└── .chroma/                 # generated local vector index
-```
-
-The builder reads the two JSON files in `data/` and indexes glossary and verified SQL-example documents. It does not require database credentials. To also index the live schema from a terminal, set `SUPABASE_CONNECTION_URL` and `SUPABASE_DATABASE_PASSWORD`, then run:
+Requirements: Python 3.10+ and a Supabase/PostgreSQL database containing the Olist `customers`, `orders`, `order_items`, and `products` tables.
 
 ```sh
-python3 seed_chroma.py --with-schema
-```
-
-The generated `.chroma/` folder is an index cache. Treat `data/` as the editable source of truth; do not manually edit files inside `.chroma/`.
-
-The following data is **not** put in Chroma:
-
-- Olist table rows or customer-level records;
-- the Supabase password or OpenAI API key;
-- evaluator ground-truth SQL from `data/text-to-sql-benchmark.json`;
-- value matching hints such as `São Paulo → SP` — those are small deterministic rules in `lib/agent.py`, not vector retrieval.
-
-Chroma's embedding function creates the vector index. To use a different local path, set it before launching the server:
-
-```sh
-export CHROMA_PATH="$PWD/.chroma"
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 python3 text_to_sql_server.py
 ```
 
-To reindex after editing the glossary, examples, or database schema, reconnect Supabase. For a complete local rebuild, stop the server, delete only the project's `.chroma/` folder, then restart and reconnect.
+Then open [http://127.0.0.1:8766](http://127.0.0.1:8766). Do not open `index.html` directly: the server provides the API endpoints used by the lab.
 
-For a remote server or Chroma Cloud, set these only in the server environment—never in browser code:
+Convenience launchers are available in `scripts/` for macOS and Windows:
 
-```text
-CHROMA_URL=https://your-chroma-host
-CHROMA_API_KEY=...
-CHROMA_TENANT=...
-CHROMA_DATABASE=...
-```
+- `Open_Text_to_SQL_Agent_Lab.command` / `.bat`
+- `Build_Text_to_SQL_Chroma.command` / `.bat`
 
-## Content and benchmarks
+`../SQL-Practice-Lab` is a read-only sibling reference project and is never modified by this app.
 
-- `data/business-glossary.json`: Add `{term, definition, tables}` entries, then reconnect Supabase to reindex Chroma.
-- `data/few-shot-examples.json`: Add question-to-SQL examples with `concepts`, `tables`, and `difficulty`, then reconnect Supabase to reindex Chroma.
-- `data/text-to-sql-benchmark.json`: Add `{id, question, ground_truth_sql, difficulty, concepts, order_sensitive}` records.
+## Quick start
 
-The evaluator never compares generated and reference SQL strings. For an exact benchmark question, it executes both read-only queries and compares result values, duplicates, numeric tolerance, and ordering when the question requires ordering. Equivalent column aliases such as `revenue` and `total_revenue` do not fail a correct answer. A near match is never treated as correct. Ground truth remains evaluator-owned, is not indexed in Chroma, and is never passed to the repair request.
+1. Start the local server and open the site.
+2. In **Connections**, select an API provider, enter its key and model, then use **Test API connection**.
+3. Enter a Supabase Session pooler URL (port 5432) and its password, then connect.
+4. Wait for the app to index retrieval context.
+5. Open **Experiment Lab**, select a challenge and an agent configuration, then run and compare experiments.
 
-## Architecture
+The built-in challenges have evaluator-owned expected outputs. Custom questions are useful for exploration but are not benchmarked.
 
-The implementation is intentionally small and modular:
+## Providers and data handling
 
-- `lib/retrieval.py` — Chroma configuration, seeding, and retrieval.
-- `lib/agent.py` — guided-stage options, ambiguity detection, context construction, and prompts.
-- `lib/llm.py` — request-scoped OpenAI adapter returning structured JSON.
-- `lib/sql_safety.py` — conservative static SQL policy, including writable CTE detection.
-- `lib/database.py` — read-only PostgreSQL execution and schema introspection.
-- `lib/evaluation.py` — execution-result comparison.
-- `lib/service.py` — bounded execution / repair orchestration (maximum two repairs).
+The UI supports:
 
-The plan in the UI is a concise structured artifact. The lab neither requests nor displays hidden chain-of-thought.
+- **OpenAI** — default model: `gpt-4.1-mini`.
+- **Duke AI Gateway** — use a newly generated Duke key and select `GPT 4.1` or a model returned by **Load available models**. Requests use Duke's OpenAI-compatible Responses endpoint.
+
+API keys remain in page memory for the current session only. They are not written to source code, browser storage, a database, or server logs. The server uses an eight-second, read-only database transaction and caps displayed query results at 200 rows.
+
+## Retrieval and evaluation
+
+ChromaDB stores a local index at `.chroma/` with compact retrieval documents:
+
+| Collection | Source | Purpose |
+| --- | --- | --- |
+| `business_glossary` | `data/business-glossary.json` | Business definitions and domain terms. |
+| `sql_examples` | `data/few-shot-examples.json` | Verified question-to-SQL patterns. |
+| `schema_docs` | Supabase `information_schema` | Live table, column, and foreign-key metadata. |
+
+The full Olist dataset, database password, API keys, and evaluator ground-truth SQL are not indexed. Reconnect Supabase after changing glossary, example, or schema content; run `seed_chroma.py --with-schema` to build an index from the terminal with database credentials available.
+
+For exact benchmark questions, the evaluator executes generated and reference SQL and compares result values, duplicates, numeric tolerance, and required ordering. It does not compare SQL strings, and a near match never counts as correct.
+
+## Course data
+
+- `data/business-glossary.json` — retrieval definitions.
+- `data/few-shot-examples.json` — verified SQL examples.
+- `data/text-to-sql-benchmark.json` — evaluator-owned benchmark questions and SQL.
+- `data/ambiguous_schema_instructor_key.json` — instructor-only mapping between the ambiguous schema's files/columns and the original schema.
+
+The **Try It in Genie** lesson links to download packages for the readable original schema and a schema whose filenames and columns have been anonymized. Upload one package to each separate Genie space, ask the same question, and compare what metadata each system needs. This is a learning experiment, not an accuracy claim.
+
+## Project structure
+
+- `index.html` — course, guided lessons, interactive simulations, and experiment UI.
+- `text_to_sql_server.py` — local development server and API routes.
+- `api/index.py` — Vercel API handler.
+- `lib/agent.py` — ambiguity checks, context construction, and prompts.
+- `lib/llm.py` — request-scoped OpenAI-compatible provider adapter.
+- `lib/retrieval.py` — Chroma configuration, indexing, and retrieval.
+- `lib/database.py` / `lib/sql_safety.py` — read-only execution and SQL guardrails.
+- `lib/evaluation.py` / `lib/service.py` — result evaluation and bounded repair orchestration.
+
+The app exposes concise plans, retrieved context, execution results, validation, and repair history. It does not request or display hidden chain-of-thought.
 
 ## Tests
 
-Run `python3 -m unittest discover -s tests -v`. The tests cover safe and unsafe SQL, CTE mutation blocking, benchmark loading, result-set equivalence, alias-tolerant evaluation, numeric tolerance, ordering, scope gating, and Responses API parsing.
+```sh
+python3 -m unittest discover -s tests -v
+```
 
-## Vercel deployment
+Tests cover SQL safety, mutation rejection, benchmark and retrieval data, result-set evaluation, ambiguity/scope checks, and OpenAI-compatible API response handling.
 
-`vercel.json` routes the site through `api/index.py`. Set `SUPABASE_CONNECTION_URL` and `SUPABASE_DATABASE_PASSWORD` in Vercel environment variables for database execution, alongside the Chroma variables above when using RAG. The OpenAI key is deliberately not a deployment environment variable: it remains request-scoped from the learner's configuration card. Use a least-privilege database role in production, enforce row/query-cost limits, and add RBAC, monitoring, audit-safe telemetry, and human review before allowing real organizational data.
+## Deploying on Vercel
+
+`vercel.json` routes requests through `api/index.py`. Configure `SUPABASE_CONNECTION_URL` and `SUPABASE_DATABASE_PASSWORD` as deployment environment variables; set the Chroma environment variables only when using a remote Chroma deployment.
+
+Do not deploy user API keys as environment variables: keys are request-scoped from the learner's browser session. Use least-privilege database credentials and add production controls such as RBAC, query-cost limits, monitoring, audit-safe telemetry, and human review before connecting real organizational data.
