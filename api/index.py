@@ -8,7 +8,7 @@ import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import parse_qs, urlparse
 
 from lib.database import execute_read_only, make_engine, schema_documents
 from lib.llm import list_models, test_connection
@@ -17,6 +17,12 @@ from lib.benchmarks import answer_key_for
 from lib.service import run_pipeline
 
 ROOT = Path(__file__).resolve().parent.parent
+
+
+def request_path(raw_path: str) -> str:
+    parsed = urlparse(raw_path)
+    route = parse_qs(parsed.query).get("route", [""])[0]
+    return f"/api/{route}" if route else parsed.path
 
 
 def respond(handler, status, payload):
@@ -31,7 +37,7 @@ def respond(handler, status, payload):
 
 class handler(BaseHTTPRequestHandler):
     def do_GET(self):
-        path = urlparse(self.path).path
+        path = request_path(self.path)
         if path == "/api/health":
             return respond(self, HTTPStatus.OK, {"mode": "vercel", "connected": bool(os.environ.get("SUPABASE_CONNECTION_URL")), "chroma": chroma_status()})
         file = ROOT / "index.html" if path in {"/", "/text-to-sql", "/index.html"} else (ROOT / path.lstrip("/"))
@@ -45,7 +51,7 @@ class handler(BaseHTTPRequestHandler):
             size = int(self.headers.get("Content-Length", "0"))
             if not 0 < size <= 100_000:
                 raise ValueError("Request body is missing or too large.")
-            payload, path = json.loads(self.rfile.read(size).decode("utf-8")), urlparse(self.path).path
+            payload, path = json.loads(self.rfile.read(size).decode("utf-8")), request_path(self.path)
             if path == "/api/test-llm":
                 return respond(self, HTTPStatus.OK, test_connection(str(payload.get("api_key", "")), str(payload.get("model", "gpt-4.1-mini")), str(payload.get("provider", "openai"))))
             if path == "/api/models":
