@@ -9,6 +9,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _configure_serverless_cache() -> None:
+    """Give Chroma's default ONNX embedder a writable cache on Vercel."""
+    if os.environ.get("VERCEL"):
+        os.environ["HOME"] = "/tmp"
+        os.environ.setdefault("XDG_CACHE_HOME", "/tmp/.cache")
+
+
 def _cloud_configured() -> bool:
     return all(os.environ.get(name) for name in ("CHROMA_API_KEY", "CHROMA_TENANT", "CHROMA_DATABASE"))
 
@@ -22,6 +29,7 @@ def _local_path() -> str | None:
 
 
 def chroma_status() -> dict:
+    _configure_serverless_cache()
     try:
         import chromadb  # noqa: F401
     except ImportError:
@@ -36,6 +44,7 @@ def chroma_status() -> dict:
 
 
 def _client():
+    _configure_serverless_cache()
     import chromadb
     if _cloud_configured():
         return chromadb.CloudClient(api_key=os.environ["CHROMA_API_KEY"], tenant=os.environ["CHROMA_TENANT"],

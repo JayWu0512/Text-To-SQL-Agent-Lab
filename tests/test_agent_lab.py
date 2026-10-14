@@ -58,6 +58,12 @@ class EvaluationTests(unittest.TestCase):
 
 
 class DataTests(unittest.TestCase):
+    def test_serverless_chroma_cache_uses_tmp(self):
+        with patch.dict(os.environ, {"VERCEL": "1", "HOME": "/read-only"}, clear=True):
+            retrieval._configure_serverless_cache()
+            self.assertEqual(os.environ["HOME"], "/tmp")
+            self.assertEqual(os.environ["XDG_CACHE_HOME"], "/tmp/.cache")
+
     def test_chroma_cloud_client_uses_deployment_credentials(self):
         cloud = {"CHROMA_API_KEY": "key", "CHROMA_TENANT": "tenant", "CHROMA_DATABASE": "database"}
         with patch.dict(os.environ, cloud, clear=True), patch("chromadb.CloudClient") as client:
