@@ -6,6 +6,7 @@ import json
 import hmac
 import mimetypes
 import os
+import traceback
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler
 from pathlib import Path
@@ -82,7 +83,9 @@ class handler(BaseHTTPRequestHandler):
             respond(self, HTTPStatus.NOT_FOUND, {"error": "Not found."})
         except (ValueError, json.JSONDecodeError) as error:
             respond(self, HTTPStatus.BAD_REQUEST, {"error": str(error)})
-        except Exception:
+        except Exception as error:
+            print(f"Unhandled API error: {type(error).__name__}: {error}", flush=True)
+            traceback.print_exc()
             respond(self, HTTPStatus.BAD_GATEWAY, {"error": "The request failed. Check configuration and try again."})
 
     def log_message(self, _format, *_args):
