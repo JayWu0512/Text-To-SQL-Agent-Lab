@@ -64,8 +64,20 @@ def _client():
     return chromadb.PersistentClient(path=path)
 
 
+def _cloud_embedding_function():
+    if not _cloud_configured():
+        return None
+    api_key = os.environ.get("OPENAI_API_KEY", "")
+    if not api_key:
+        raise ValueError("Set OPENAI_API_KEY to use OpenAI embeddings with Chroma Cloud.")
+    from chromadb.utils.embedding_functions import OpenAIEmbeddingFunction
+    return OpenAIEmbeddingFunction(api_key=api_key, model_name="text-embedding-3-small")
+
+
 def _collection(name: str):
-    return _client().get_or_create_collection(name)
+    embedding_function = _cloud_embedding_function()
+    kwargs = {"embedding_function": embedding_function} if embedding_function else {}
+    return _client().get_or_create_collection(name, **kwargs)
 
 
 def retrieve(name: str, question: str, limit: int) -> list[dict]:
@@ -79,7 +91,7 @@ def retrieve(name: str, question: str, limit: int) -> list[dict]:
             for document, metadata, distance in zip(results["documents"][0], results["metadatas"][0], results["distances"][0])]
 
 
-def seed_collections(schema_docs: list[dict] | None = None) -> dict:
+def seed_collections(schema_docs: list[dict] | None = None, reset: bool = False) -> dict:
     """Seed glossary/examples and optional live database schema into Chroma."""
     client = _client()
     glossary = json.loads((ROOT / "data" / "business-glossary.json").read_text())
@@ -89,9 +101,16 @@ def seed_collections(schema_docs: list[dict] | None = None) -> dict:
         "sql_examples": [{"id": f"example:{index}", "document": f"Question: {item['question']}\nSQL:\n{item['sql']}", "metadata": {"question": item["question"], "difficulty": item["difficulty"]}} for index, item in enumerate(examples)],
         "schema_docs": schema_docs or [],
     }
+    embedding_function = _cloud_embedding_function()
+    kwargs = {"embedding_function": embedding_function} if embedding_function else {}
+    if reset:
+        existing = {collection.name for collection in client.list_collections()}
+        for name in sources:
+            if name in existing:
+                client.delete_collection(name)
     counts = {}
     for name, docs in sources.items():
-        collection = client.get_or_create_collection(name)
+        collection = client.get_or_create_collection(name, **kwargs)
         if docs:
             collection.upsert(ids=[doc["id"] for doc in docs], documents=[doc["document"] for doc in docs], metadatas=[doc["metadata"] for doc in docs])
         counts[name] = len(docs)

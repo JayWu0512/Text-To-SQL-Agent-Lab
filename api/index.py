@@ -77,7 +77,7 @@ class handler(BaseHTTPRequestHandler):
             try:
                 if path == "/api/query": return respond(self, HTTPStatus.OK, execute_read_only(engine, str(payload.get("sql", ""))))
                 if path == "/api/text-to-sql": return respond(self, HTTPStatus.OK, run_pipeline(payload, engine))
-                if path == "/api/seed-chroma": return respond(self, HTTPStatus.OK, {"collections": seed_collections(schema_documents(engine))})
+                if path == "/api/seed-chroma": return respond(self, HTTPStatus.OK, {"collections": seed_collections(schema_documents(engine), reset=True)})
             finally:
                 if engine is not None: engine.dispose()
             respond(self, HTTPStatus.NOT_FOUND, {"error": "Not found."})

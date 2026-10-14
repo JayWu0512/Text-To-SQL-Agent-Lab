@@ -70,6 +70,12 @@ class DataTests(unittest.TestCase):
             retrieval._client()
         client.assert_called_once_with(api_key="key", tenant="tenant", database="database")
 
+    def test_chroma_cloud_embeddings_require_openai_key(self):
+        cloud = {"CHROMA_API_KEY": "key", "CHROMA_TENANT": "tenant", "CHROMA_DATABASE": "database"}
+        with patch.dict(os.environ, cloud, clear=True):
+            with self.assertRaisesRegex(ValueError, "OPENAI_API_KEY"):
+                retrieval._cloud_embedding_function()
+
     def test_benchmarks_load(self):
         self.assertGreaterEqual(len(load_benchmarks()), 3)
 
