@@ -2,4 +2,5 @@ SQLAlchemy>=2.0,<3
 certifi>=2024.0
 psycopg[binary]>=3.1,<4
 chromadb>=0.5,<2
+openai>=1.0,<3
 sqlglot>=26,<30
