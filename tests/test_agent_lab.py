@@ -114,6 +114,10 @@ class LlmResponseTests(unittest.TestCase):
         with patch.dict(os.environ, {"DUKE_API_KEY": "deployment-key"}, clear=True):
             self.assertEqual(_resolve_api_key("", "duke"), "deployment-key")
 
+    def test_openai_uses_the_deployment_key_when_no_browser_key_is_given(self):
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "deployment-key"}, clear=True):
+            self.assertEqual(_resolve_api_key("", "openai"), "deployment-key")
+
     @patch("lib.llm._request")
     def test_connection_uses_a_simple_non_structured_request(self, request):
         test_connection("sk-test", "gpt-4.1-mini")

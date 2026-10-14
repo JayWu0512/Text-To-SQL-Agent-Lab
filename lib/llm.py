@@ -27,6 +27,8 @@ def _provider(provider: str) -> dict:
 def _resolve_api_key(api_key: str, provider: str) -> str:
     if api_key.strip():
         return api_key.strip()
+    if provider == "openai":
+        return os.environ.get("OPENAI_API_KEY", "")
     if provider == "duke":
         return os.environ.get("DUKE_API_KEY", "")
     return ""
