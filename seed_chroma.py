@@ -13,6 +13,20 @@ from lib.retrieval import seed_collections
 ROOT = Path(__file__).resolve().parent
 
 
+def load_local_env() -> None:
+    """Load simple KEY=VALUE entries from the ignored local .env file."""
+    env_file = ROOT / ".env"
+    if not env_file.is_file():
+        return
+    for line in env_file.read_text().splitlines():
+        key, separator, value = line.strip().partition("=")
+        if separator and key and not key.startswith("#"):
+            os.environ.setdefault(key, value.strip().strip('"').strip("'"))
+
+
+load_local_env()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build a Text-to-SQL Lab Chroma index.")
     parser.add_argument("--path", default=str(ROOT / ".chroma"), help="Local Chroma folder (default: ./.chroma)")

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from http import HTTPStatus
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -17,6 +18,20 @@ from lib.service import run_pipeline
 HOST, PORT = "127.0.0.1", 8766
 ROOT = Path(__file__).resolve().parent
 engine = None
+
+
+def load_local_env() -> None:
+    """Load simple KEY=VALUE entries from the ignored local .env file."""
+    env_file = ROOT / ".env"
+    if not env_file.is_file():
+        return
+    for line in env_file.read_text().splitlines():
+        key, separator, value = line.strip().partition("=")
+        if separator and key and not key.startswith("#"):
+            os.environ.setdefault(key, value.strip().strip('"').strip("'"))
+
+
+load_local_env()
 
 
 def respond(handler, status, payload):
