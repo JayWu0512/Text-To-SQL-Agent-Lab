@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Making Text-to-SQL Agents Worthy of Trust</title>
+<style>
+  @page { size: 24in 24in; margin: 0; }
+  * { box-sizing: border-box; }
+  html, body { width: 24in; min-height: 24in; margin: 0; }
+  body { background: #ffffff; color: #1f2937; font-family: Arial, Helvetica, sans-serif; }
+  .poster { width: 24in; height: 24in; padding: .42in .62in .38in; border-top: .08in solid #012169; display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; gap: .22in; }
+  .top { display: grid; grid-template-columns: 2.3in 1fr 3.2in; gap: .25in; align-items: center; }
+  .affiliation { display: flex; min-height: 1.12in; align-items: center; padding-right: .12in; border-right: .018in solid #c5d1df; }
+  .affiliation img { width: 1.75in; height: auto; }
+  .title-block { text-align: center; }
+  .eyebrow { margin: 0 0 .07in; color: #1e5aa8; font-size: .16in; font-weight: 800; letter-spacing: .04in; text-transform: uppercase; }
+  h1 { margin: 0; color: #012169; font-size: .5in; letter-spacing: -.018in; line-height: 1.05; }
+  .subtitle { margin: .1in 0 0; font-size: .22in; line-height: 1.3; }
+  .authors { margin: .1in 0 0; color: #012169; font-size: .18in; font-weight: 700; }
+  .artifact { display: grid; grid-template-columns: 1fr .96in; gap: .14in; align-items: center; padding: .16in; border: .02in solid #a8bdd6; border-radius: .08in; background: #f3f7fc; }
+  .artifact-copy { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
+  .artifact strong { color: #012169; font-size: .2in; }
+  .artifact a { margin-top: .06in; color: #1f2937; font-size: .15in; line-height: 1.3; overflow-wrap: anywhere; }
+  .artifact img { width: .94in; height: .94in; image-rendering: pixelated; }
+  .artifact .qr-label { margin: .03in 0 0; color: #012169; font-size: .115in; font-weight: 800; line-height: 1.15; text-align: center; }
+  .question { padding: .2in .27in; border-left: .1in solid #1e5aa8; border-radius: .05in; background: #edf4fc; }
+  .question h2 { margin: 0 0 .06in; color: #012169; font-size: .24in; }
+  .question p { margin: 0; font-size: .26in; line-height: 1.35; }
+  .content { display: grid; grid-template-columns: 1.02fr 1.38fr 1.02fr; gap: .25in; min-height: 0; }
+  .column { min-height: 0; display: grid; gap: .22in; }
+  .column:nth-child(1) { grid-template-rows: 1fr 1.12fr 1.18fr; }
+  .column:nth-child(2) { grid-template-rows: 2.15fr 1fr; }
+  .column:nth-child(3) { grid-template-rows: 1.1fr .98fr 1.22fr .72fr; }
+  .card { padding: .26in .28in; border: .018in solid #b8c7d9; border-radius: .06in; background: #ffffff; }
+  .card h2, .evidence h2 { margin: 0 0 .13in; color: #012169; font-size: .3in; line-height: 1.1; }
+  .card h3 { margin: .14in 0 .06in; color: #756453; font-size: .2in; }
+  .card p, li { font-size: .22in; line-height: 1.4; }
+  .card p { margin: 0; }
+  ul { margin: .1in 0 0; padding-left: .25in; }
+  li + li { margin-top: .06in; }
+  .flow { display: grid; grid-template-columns: 1fr .2in 1fr; gap: .08in; align-items: center; margin-top: .14in; }
+  .flow .box { padding: .15in; border-radius: .04in; background: #edf4fc; color: #012169; font-size: .18in; font-weight: 700; text-align: center; line-height: 1.25; }
+  .flow .arrow { color: #1e5aa8; font-size: .26in; font-weight: 700; text-align: center; }
+  .mini-note { margin-top: .18in; padding: .13in; border-left: .07in solid #1e5aa8; border-radius: .04in; background: #f4f7fa; font-size: .17in; line-height: 1.35; }
+  .metric-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .08in; margin-top: .18in; }
+  .metric-grid div { padding: .12in .06in; border-top: .05in solid #1e5aa8; border-radius: .04in; background: #f3f7fc; text-align: center; }
+  .metric-grid strong { display: block; color: #012169; font-size: .3in; line-height: 1; }
+  .metric-grid span { display: block; margin-top: .05in; color: #374151; font-size: .12in; font-weight: 700; line-height: 1.2; }
+  .pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: .08in; margin-top: .16in; }
+  .pipeline div { min-height: .76in; padding: .12in .08in; border-top: .07in solid #1e5aa8; border-radius: .04in; background: #f3f7fc; color: #012169; font-size: .17in; font-weight: 700; line-height: 1.25; text-align: center; }
+  .pipeline div:nth-child(2) { border-color: #4e85c5; }
+  .pipeline div:nth-child(3) { border-color: #789bc8; }
+  .pipeline div:nth-child(4) { border-color: #012169; }
+  .run-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: .07in; margin-top: .2in; }
+  .run-steps div { padding: .11in .08in; border: .015in solid #c5d1df; border-radius: .04in; color: #374151; font-size: .15in; font-weight: 700; line-height: 1.25; text-align: center; }
+  .component-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .07in; margin-top: .18in; }
+  .component-grid div { padding: .1in; border-radius: .04in; background: #edf4fc; color: #012169; font-size: .15in; font-weight: 700; text-align: center; }
+  .architecture { display: grid; grid-template-columns: repeat(5, 1fr); gap: .05in; margin-top: .17in; align-items: center; }
+  .architecture div { position: relative; min-height: .46in; padding: .09in .04in; border: .014in solid #a8bdd6; border-radius: .04in; background: #ffffff; color: #012169; font-size: .12in; font-weight: 700; line-height: 1.15; text-align: center; }
+  .architecture div:not(:last-child)::after { content: '→'; position: absolute; right: -.1in; top: 50%; z-index: 1; color: #1e5aa8; font-size: .17in; font-weight: 800; transform: translateY(-52%); }
+  .interface-figure { margin: .16in 0 0; }
+  .interface-figure img { display: block; width: 100%; border: .018in solid #a8bdd6; border-radius: .04in; }
+  .interface-figure figcaption { margin-top: .06in; color: #4b5563; font-size: .12in; line-height: 1.25; }
+  .evidence { padding: .26in .28in; border: .025in solid #012169; border-radius: .06in; background: #ffffff; }
+  .evidence > p { margin: -.05in 0 .18in; font-size: .22in; line-height: 1.4; }
+  .conditions { display: grid; gap: .1in; }
+  .condition { display: grid; grid-template-columns: 2.1in .9in 1fr; align-items: stretch; border: .015in solid #c5d1df; border-radius: .04in; overflow: hidden; }
+  .condition div { padding: .15in .16in; font-size: .19in; line-height: 1.32; }
+  .condition .label { background: #edf4fc; color: #012169; font-weight: 800; }
+  .condition .score { display: flex; align-items: center; justify-content: center; color: #a43a32; font-size: .25in; font-weight: 800; }
+  .condition.pass .score { color: #1c6b45; }
+  .condition.control .label { background: #f4f7fa; }
+  .condition.control .score { color: #1e5aa8; font-size: .15in; line-height: 1.1; text-align: center; }
+  .condition .change { border-left: .015in solid #c5d1df; }
+  .control-label { margin: .14in 0 .07in; color: #4b5563; font-size: .14in; font-style: italic; font-weight: 700; }
+  .post-controls { margin-top: .12in; padding: .12in .14in; border-left: .06in solid #1e5aa8; border-radius: .04in; background: #f4f7fa; color: #374151; font-size: .155in; line-height: 1.3; }
+  .post-controls strong { color: #012169; }
+  .chart { display: grid; gap: .08in; margin: .18in 0; }
+  .chart-row { display: grid; grid-template-columns: 1.65in 1fr .48in; gap: .1in; align-items: center; font-size: .16in; }
+  .chart-row span:first-child { color: #374151; font-weight: 700; }
+  .track { height: .19in; overflow: hidden; border-radius: 999px; background: #d9e3ef; }
+  .bar { display: block; height: 100%; min-width: .04in; border-radius: inherit; background: #a43a32; }
+  .chart-row.pass .bar { background: #1e5aa8; }
+  .chart-row strong { color: #012169; font-size: .18in; }
+  .result { margin-top: .16in; padding: .17in .18in; border-left: .1in solid #1e5aa8; border-radius: .04in; background: #edf4fc; color: #012169; font-size: .2in; line-height: 1.38; }
+  .sql-contrast { display: grid; grid-template-columns: 1fr 1fr; gap: .12in; margin-top: .17in; }
+  .sql-contrast div { padding: .12in; border-radius: .04in; background: #f4f7fa; font-size: .15in; line-height: 1.32; }
+  .sql-contrast div:last-child { border-left: .06in solid #1e5aa8; background: #edf4fc; }
+  .sql-contrast strong { display: block; margin-bottom: .05in; color: #012169; font-size: .17in; }
+  .method-note { margin-top: .14in; padding: .11in .14in; border: .014in solid #c5d1df; border-radius: .04in; color: #374151; font-size: .145in; line-height: 1.3; }
+  .pillars { display: grid; gap: .1in; }
+  .pillar { padding: .17in .18in; border-radius: .04in; background: #f3f7fc; }
+  .pillar strong { display: block; margin-bottom: .04in; color: #012169; font-size: .22in; }
+  .pillar span { font-size: .2in; line-height: 1.35; }
+  .trace-strip { margin-top: .18in; padding: .13in; border-radius: .04in; background: #edf4fc; color: #012169; font-size: .16in; font-weight: 700; line-height: 1.35; text-align: center; }
+  .run-record { display: grid; gap: .06in; margin-top: .18in; }
+  .run-record div { display: grid; grid-template-columns: 1.12in 1fr; border: .014in solid #c5d1df; border-radius: .04in; overflow: hidden; }
+  .run-record strong { padding: .08in .1in; background: #edf4fc; color: #012169; font-size: .14in; }
+  .run-record span { padding: .08in .1in; font-size: .14in; line-height: 1.27; }
+  .finding-grid { display: grid; gap: .1in; margin-top: .18in; }
+  .finding-grid div { padding: .11in .13in; border-left: .07in solid #1e5aa8; border-radius: .04in; background: #edf4fc; font-size: .16in; line-height: 1.3; }
+  .finding-grid strong { color: #012169; }
+  .trust-message { margin: .14in 0; padding: .16in .18in; border-left: .1in solid #1e5aa8; border-radius: .04in; background: #edf4fc; color: #012169; font-size: .23in; font-weight: 800; line-height: 1.26; }
+  .responsibility-levels { display: grid; grid-template-columns: repeat(3, 1fr); gap: .08in; margin-top: .14in; }
+  .responsibility-levels div { padding: .1in; border-top: .05in solid #1e5aa8; border-radius: .04in; background: #f3f7fc; font-size: .135in; line-height: 1.25; }
+  .responsibility-levels strong { display: block; margin-bottom: .04in; color: #012169; font-size: .15in; }
+  .action-flow { display: grid; grid-template-columns: repeat(3, 1fr); gap: .12in; margin-top: .16in; }
+  .action-flow div { position: relative; padding: .13in .12in; border-top: .05in solid #1e5aa8; border-radius: .04in; background: #f3f7fc; font-size: .14in; line-height: 1.28; }
+  .action-flow div:not(:last-child)::after { content: '→'; position: absolute; right: -.105in; top: .17in; z-index: 1; color: #1e5aa8; font-size: .2in; font-weight: 800; }
+  .action-flow strong { display: block; margin-bottom: .04in; color: #012169; font-size: .16in; }
+  .governance-table { display: grid; gap: .06in; margin-top: .16in; }
+  .governance-table div { display: grid; grid-template-columns: 1.22in 1fr; border-bottom: .014in solid #c5d1df; padding-bottom: .06in; }
+  .governance-table strong { color: #012169; font-size: .14in; }
+  .governance-table span { font-size: .14in; line-height: 1.25; }
+  .reference-list { margin: .1in 0 0; padding-left: .2in; }
+  .reference-list li { margin: 0 0 .05in; font-size: .135in; line-height: 1.25; }
+  .related-columns { display: grid; grid-template-columns: 1fr 1fr; gap: .12in; margin-top: .08in; }
+  .related-columns section { padding: .1in; border-left: .05in solid #1e5aa8; background: #f7faff; }
+  .related-columns h3 { margin: 0 0 .07in; color: #012169; font-size: .15in; }
+  .related-columns ul { margin: 0; padding-left: .16in; }
+  .related-columns li { margin: 0 0 .05in; font-size: .12in; line-height: 1.23; }
+  .claim-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .08in; margin-top: .14in; }
+  .claim-grid div { padding: .11in; border-radius: .04in; font-size: .13in; line-height: 1.28; }
+  .claim-grid div:first-child { background: #edf4fc; border-left: .05in solid #1e5aa8; }
+  .claim-grid div:last-child { background: #f4f7fa; border-left: .05in solid #6b7280; }
+  .claim-grid strong { display: block; margin-bottom: .04in; color: #012169; font-size: .15in; }
+  .safety { display: grid; grid-template-columns: 1fr 1fr; gap: .1in; }
+  .safety div { padding: .14in; border-radius: .04in; background: #edf4fc; font-size: .17in; line-height: 1.32; }
+  .safety strong { color: #012169; }
+  .limitations { background: #f4f7fa; }
+  footer { display: flex; justify-content: flex-end; align-items: end; padding-top: .1in; border-top: .018in solid #a8bdd6; }
+  footer p { margin: 0; font-size: .14in; line-height: 1.35; }
+  footer strong { color: #012169; }
+  .tag { color: #1e5aa8; font-weight: 800; letter-spacing: .025in; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<main class="poster">
+  <header class="top">
+    <div class="affiliation"><img src="../assets/Duke-University-Logo-500x281.png" alt="Duke University"></div>
+    <div class="title-block">
+      <h1>Making Text-to-SQL Agents Worthy of Trust</h1>
+      <p class="subtitle">An interactive lab for inspecting, testing, and governing the workflow behind a natural-language database answer.</p>
+      <p class="authors">Sung-Tse Wu · Duke University</p>
+    </div>
+    <aside class="artifact">
+      <div class="artifact-copy"><strong>Interactive artifact</strong><a href="https://text-to-sql-agent-lab-ids706.vercel.app">text-to-sql-agent-lab-ids706.vercel.app</a><a href="https://github.com/JayWu0512/Text-To-SQL-Agent-Lab">github.com/JayWu0512/Text-To-SQL-Agent-Lab</a></div>
+      <div><img src="../assets/live-demo-qr.png" alt="QR code for the live Text-to-SQL Agent Lab"><p class="qr-label">Try the Interactive Lab</p></div>
+    </aside>
+  </header>
+
+  <section class="question">
+    <h2>Design question</h2>
+    <p>How can a learner judge whether a Text-to-SQL agent deserves trust, rather than trusting SQL merely because it executes?</p>
+  </section>
+
+  <section class="content">
+    <div class="column">
+      <article class="card">
+        <h2>Abstract &amp; motivation</h2>
+        <p>Text-to-SQL systems can return fluent, executable queries that still use the wrong business definition, table grain, filter, or output format.</p>
+        <div class="flow">
+          <div class="box">Natural-language question</div><div class="arrow">→</div><div class="box">SQL that runs</div>
+          <div class="box">Does it answer the intended question?</div><div class="arrow">?</div><div class="box">Evidence is needed</div>
+        </div>
+          <div class="mini-note"><strong>Common failure modes:</strong> valid syntax can still use the wrong business definition, aggregation grain, filter, or output format.</div>
+          <div class="metric-grid"><div><strong>3</strong><span>XAI modules</span></div><div><strong>6</strong><span>agent components</span></div><div><strong>10×</strong><span>runs per condition</span></div></div>
+      </article>
+
+      <article class="card">
+        <h2>System design</h2>
+        <p>A browser-based course and live experiment lab using the Olist e-commerce schema. Learners configure components, run a question, and inspect evidence from the run.</p>
+        <div class="run-steps"><div>1<br>Configure</div><div>2<br>Run</div><div>3<br>Inspect</div><div>4<br>Compare</div></div>
+        <figure class="interface-figure"><img src="../assets/text-to-sql-lab-interface-screenshot.png" alt="Actual Text-to-SQL Agent Lab interface with local configuration panels and course navigation"><figcaption>Actual Text-to-SQL Agent Lab interface. The live artifact exposes configuration and later run evidence for inspection.</figcaption></figure>
+      </article>
+
+      <article class="card">
+        <h2>Inspectable evidence</h2>
+        <ul>
+          <li>Retrieved definitions, schema documents, and verified examples</li>
+          <li>A concise, student-visible SQL plan</li>
+          <li>Generated SQL, read-only execution result, and evaluator outcome</li>
+          <li>Validation feedback and bounded repair history</li>
+        </ul>
+        <div class="trace-strip">Question → retrieved evidence → SQL → execution → evaluation → repair record</div>
+        <div class="run-record" aria-label="Build and Test Your Agent observable run record">
+          <div><strong>Input</strong><span>Question, selected agent components, model, and benchmark.</span></div>
+          <div><strong>Grounding</strong><span>Retrieved glossary, schema documents, examples, and value hints.</span></div>
+          <div><strong>Action</strong><span>Student-visible plan, generated SQL, validation decision, and execution rows.</span></div>
+          <div><strong>Outcome</strong><span>PASS/FAIL evaluation, accuracy, latency, and any repair attempts.</span></div>
+        </div>
+      </article>
+    </div>
+
+    <div class="column">
+      <section class="evidence">
+        <h2>Methods &amp; results: cumulative component study</h2>
+        <p><strong>Task.</strong> “For orders placed in 2018, calculate the total number of orders for each month, from earliest to latest.” We held the model, evaluator, and read-only database fixed, then added generation components cumulatively. Each condition ran 10 times.</p>
+        <div class="conditions">
+          <div class="condition"><div class="label">LLM only<br><small>Baseline</small></div><div class="score">0/10</div><div class="change">No business semantics, schema linking, or example retrieval. Queries often returned month numbers or an extra year column.</div></div>
+          <div class="condition"><div class="label">+ Business semantics</div><div class="score">0/10</div><div class="change">Adds the glossary. Four runs added an unsupported delivered-order filter; remaining runs still used the wrong output shape.</div></div>
+          <div class="condition"><div class="label">+ Schema linking</div><div class="score">0/10</div><div class="change">Adds four retrieved schema documents per run. Every run found 10 months but produced a timestamp, month number, or extra year column.</div></div>
+          <div class="condition pass"><div class="label">+ Example retrieval</div><div class="score">10/10</div><div class="change">Adds four verified examples per run. This was the first successful configuration in this controlled sequence.</div></div>
+          <div class="condition pass"><div class="label">+ Query planning</div><div class="score">10/10</div><div class="change">Makes the intended filter, grouping, count, and ordering visible before SQL is generated.</div></div>
+          <div class="post-controls"><strong>Post-generation safeguards (not pass-rate conditions):</strong> Guardrails protect the database; repair uses bounded feedback; evaluation compares returned results with ground truth.</div>
+        </div>
+        <div class="chart" aria-label="Pass rate across ten runs for each agent configuration">
+          <div class="chart-row"><span>LLM only</span><span class="track"><i class="bar" style="width:0%"></i></span><strong>0/10</strong></div>
+          <div class="chart-row"><span>+ Business semantics</span><span class="track"><i class="bar" style="width:0%"></i></span><strong>0/10</strong></div>
+          <div class="chart-row"><span>+ Schema linking</span><span class="track"><i class="bar" style="width:0%"></i></span><strong>0/10</strong></div>
+          <div class="chart-row pass"><span>+ Example retrieval</span><span class="track"><i class="bar" style="width:100%"></i></span><strong>10/10</strong></div>
+          <div class="chart-row pass"><span>+ Query planning</span><span class="track"><i class="bar" style="width:100%"></i></span><strong>10/10</strong></div>
+        </div>
+        <div class="result"><strong>Observed change: 0/10 → 10/10.</strong> Verified examples were associated with the first successful configuration in this cumulative experiment; this design does not isolate any component’s independent effect.</div>
+        <div class="sql-contrast"><div><strong>Without verified examples</strong><code>EXTRACT(MONTH FROM timestamp)</code><br>Wrong output shape: a month number or extra year column.</div><div><strong>With verified examples</strong><code>DATE_TRUNC('month', timestamp)::date</code><br>Correct output shape: the required monthly date grain.</div></div>
+        <div class="method-note"><strong>Controlled comparison:</strong> question, model, evaluator, database, and read-only execution were fixed; the evaluator compared generated results against ground truth, including values and required ordering.</div>
+      </section>
+
+      <section class="card">
+        <h2>Key findings</h2>
+        <div class="trust-message">Execution is not evidence of correctness. Trust requires inspectable evidence.</div>
+        <p>This is an interactive educational framework for examining AI behavior—not simply a way to improve SQL accuracy. Learners inspect retrieved context and business definitions, generated SQL and results, ground-truth evaluation, failure modes, and repair history.</p>
+        <div class="responsibility-levels"><div><strong>System performance</strong>Does SQL produce the expected answer?</div><div><strong>Explainability &amp; observability</strong>Can a learner inspect evidence, actions, and evaluation?</div><div><strong>Human judgment</strong>Can the learner identify errors and question assumptions?</div></div>
+        <div class="finding-grid"><div><strong>Evidence, not hidden reasoning.</strong> The interface exposes observable artifacts without claiming access to private model reasoning.</div><div><strong>Current study scope.</strong> The controlled experiment evaluates system performance; whether the interface improves human judgment remains a future study.</div></div>
+      </section>
+
+    </div>
+
+    <div class="column">
+      <article class="card">
+        <h2>Responsible AI framework</h2>
+        <div class="pillars">
+          <div class="pillar"><strong>Observability</strong><span>Review inputs, retrieved context, generated SQL, execution, evaluation, and repairs.</span></div>
+          <div class="pillar"><strong>Behavioral explainability</strong><span>Change one component and compare observable SQL and evaluation outcomes.</span></div>
+          <div class="pillar"><strong>Transparency &amp; accountability</strong><span>Make policies and responsibilities explicit before high-risk actions occur.</span></div>
+        </div>
+        <div class="governance-table"><div><strong>Evidence exposed</strong><span>Retrieved context, SQL, result, evaluation, repair history.</span></div><div><strong>Human use</strong><span>Debug a run, compare configurations, approve or stop risky actions.</span></div></div>
+      </article>
+
+      <article class="card">
+        <h2>Implementation safeguards</h2>
+        <div class="safety">
+          <div><strong>Read-only SQL</strong><br>Only one SELECT, WITH, or EXPLAIN statement is accepted.</div>
+          <div><strong>Mutation blocking</strong><br>Write, DDL, privilege, and locking statements are rejected.</div>
+          <div><strong>Bounded execution</strong><br>Eight-second timeout and a 200-row display limit.</div>
+          <div><strong>Result evaluation</strong><br>Compares returned answers rather than SQL strings.</div>
+        </div>
+      </article>
+
+      <article class="card limitations">
+        <h2>Limitations &amp; future work</h2>
+        <ul>
+          <li>Current evidence uses the Olist schema and one controlled benchmark question.</li>
+          <li>Components were added cumulatively; independent effects and interactions were not isolated.</li>
+          <li>Model outputs can vary by provider, model version, and run.</li>
+          <li>The policy interface is educational; it is not production RBAC or an enterprise audit system.</li>
+          <li><strong>Next:</strong> evaluate across more questions, datasets, and models; add versioned experiment logs; and conduct a small user study comparing learners’ error detection and trust calibration with and without the XAI interface.</li>
+        </ul>
+        <div class="claim-grid"><div><strong>What this poster claims</strong>Measured, observable behavior for one fixed benchmark and configuration.</div><div><strong>What it does not claim</strong>Access to hidden reasoning, universal performance, or production-ready governance.</div></div>
+      </article>
+
+      <article class="card">
+        <h2>Related work</h2>
+        <div class="related-columns"><section><h3>Text-to-SQL &amp; evaluation</h3><ul><li>Pourreza &amp; Rafiei (2023), <em>DIN-SQL</em></li><li>Yu et al. (2018), <em>Spider</em></li><li>Li et al. (2023), <em>BIRD</em></li></ul></section><section><h3>Explainability &amp; governance</h3><ul><li>Doshi-Velez &amp; Kim (2017)</li><li>NIST (2023), <em>AI RMF 1.0</em></li><li>Ribeiro et al. (2016), <em>LIME</em></li></ul></section></div>
+      </article>
+    </div>
+  </section>
+
+  <footer><p>Responsible AI Final Project<br>Text-to-SQL Agent Lab · 2026</p></footer>
+</main>
+</body>
+</html>
