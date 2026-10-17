@@ -74,8 +74,10 @@
   .condition.control .score { color: #1e5aa8; font-size: .15in; line-height: 1.1; text-align: center; }
   .condition .change { border-left: .015in solid #c5d1df; }
   .control-label { margin: .14in 0 .07in; color: #4b5563; font-size: .14in; font-style: italic; font-weight: 700; }
-  .post-controls { margin-top: .12in; padding: .12in .14in; border-left: .06in solid #1e5aa8; border-radius: .04in; background: #f4f7fa; color: #374151; font-size: .155in; line-height: 1.3; }
-  .post-controls strong { color: #012169; }
+  .post-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: .08in; margin-top: .12in; }
+  .post-controls-heading { grid-column: 1 / -1; color: #4b5563; font-size: .14in; font-style: italic; font-weight: 700; }
+  .post-control { padding: .11in .12in; border-top: .06in solid #1e5aa8; border-radius: .04in; background: #f4f7fa; color: #374151; font-size: .145in; line-height: 1.28; }
+  .post-control strong { display: block; margin-bottom: .04in; color: #012169; font-size: .17in; }
   .chart { display: grid; gap: .08in; margin: .18in 0; }
   .chart-row { display: grid; grid-template-columns: 1.65in 1fr .48in; gap: .1in; align-items: center; font-size: .16in; }
   .chart-row span:first-child { color: #374151; font-weight: 700; }
@@ -203,7 +205,12 @@
           <div class="condition"><div class="label">+ Schema linking</div><div class="score">0/10</div><div class="change">Adds four retrieved schema documents per run. Every run found 10 months but produced a timestamp, month number, or extra year column.</div></div>
           <div class="condition pass"><div class="label">+ Example retrieval</div><div class="score">10/10</div><div class="change">Adds four verified examples per run. This was the first successful configuration in this controlled sequence.</div></div>
           <div class="condition pass"><div class="label">+ Query planning</div><div class="score">10/10</div><div class="change">Makes the intended filter, grouping, count, and ordering visible before SQL is generated.</div></div>
-          <div class="post-controls"><strong>Post-generation safeguards (not pass-rate conditions):</strong> Guardrails protect the database; repair uses bounded feedback; evaluation compares returned results with ground truth.</div>
+          <div class="post-controls">
+            <div class="post-controls-heading">Post-generation safeguards (not pass-rate conditions)</div>
+            <div class="post-control"><strong>Guardrails</strong>Validate generated SQL before execution. Block mutations, DDL, privileges, locks, and multiple statements; execute only read-only queries.</div>
+            <div class="post-control"><strong>Repair</strong>Use structured validation or database feedback to revise a failed query, with bounded retries and the original task preserved.</div>
+            <div class="post-control"><strong>Evaluation</strong>Compare generated results with the evaluator-owned ground truth, including rows, values, NULLs, duplicates, and required ordering.</div>
+          </div>
         </div>
         <div class="chart" aria-label="Pass rate across ten runs for each agent configuration">
           <div class="chart-row"><span>LLM only</span><span class="track"><i class="bar" style="width:0%"></i></span><strong>0/10</strong></div>
@@ -220,9 +227,8 @@
       <section class="card">
         <h2>Key findings</h2>
         <div class="trust-message">Execution is not evidence of correctness. Trust requires inspectable evidence.</div>
-        <p>This is an interactive educational framework for examining AI behavior—not simply a way to improve SQL accuracy. Learners inspect retrieved context and business definitions, generated SQL and results, ground-truth evaluation, failure modes, and repair history.</p>
+        <p>The lab makes retrieved context, generated SQL, execution, evaluation, and repair records available for review.</p>
         <div class="responsibility-levels"><div><strong>System performance</strong>Does SQL produce the expected answer?</div><div><strong>Explainability &amp; observability</strong>Can a learner inspect evidence, actions, and evaluation?</div><div><strong>Human judgment</strong>Can the learner identify errors and question assumptions?</div></div>
-        <div class="finding-grid"><div><strong>Evidence, not hidden reasoning.</strong> The interface exposes observable artifacts without claiming access to private model reasoning.</div><div><strong>Current study scope.</strong> The controlled experiment evaluates system performance; whether the interface improves human judgment remains a future study.</div></div>
       </section>
 
     </div>
