@@ -4,6 +4,10 @@ An interactive course for learning how a Text-to-SQL agent turns a business ques
 
 The lab uses the Olist Brazilian e-commerce dataset and teaches the practical controls around an agent workflow: business context, schema retrieval, verified examples, planning, read-only execution, evaluation, repair, and human review.
 
+## Live site
+
+Welcome to explore the live [Text-to-SQL Agent Lab](https://text-to-sql-agent-lab-ids706.vercel.app/).
+
 ## Project contribution
 
 **Design question:** How can a learner judge whether a Text-to-SQL agent deserves trust, rather than trusting SQL merely because it executes?
